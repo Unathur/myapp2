@@ -201,6 +201,8 @@ class MirrorListener:
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
         msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
+        pmwarn = f"\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗳𝗶𝗹𝗲𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
+        pmwarn_mirror = f"\n\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗹𝗶𝗻𝗸𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
         if self.isLeech:
             
             msg += f'\n<b>Total Files: </b>{folders}'
@@ -215,11 +217,11 @@ class MirrorListener:
                 for index, (link, name) in enumerate(files.items(), start=1):
                     fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMarkup(msg + fmsg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                        sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
                         sleep(1)
                         fmsg = ''
                 if fmsg != '':
-                    sendMarkup(msg + fmsg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                    sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
         else:
             msg += f'\n\n<b>Type: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
@@ -284,14 +286,14 @@ class MirrorListener:
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
-                        bot.sendMessage(chat_id=chatid, text=msg,
+                        bot.sendMessage(chat_id=chatid, text=msg + uploader + msg_g,
                                         reply_markup=InlineKeyboardMarkup(buttons.build_menu(2)),
                                         parse_mode=ParseMode.HTML)
                 except Exception as e:
                     LOGGER.warning(e)
             if BOT_PM and self.message.chat.type != 'private':
                 try:
-                    bot.sendMessage(chat_id=self.user_id, text=msg,
+                    bot.sendMessage(chat_id=self.user_id, text=msg + msg_g,
                                     reply_markup=InlineKeyboardMarkup(buttons.build_menu(2)),
                                     parse_mode=ParseMode.HTML)
                 except Exception as e:
