@@ -210,7 +210,8 @@ class MirrorListener:
                 msg += f'\n<b>Corrupted Files: </b>{typ}'
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if not files:
-                sendMessage(msg, self.bot, self.message)
+                msg2 = sendMessage(msg, self.bot, self.message)
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg2)).start()
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
