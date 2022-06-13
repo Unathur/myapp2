@@ -210,30 +210,31 @@ class MirrorListener:
                 msg += f'\n<b>Corrupted Files: </b>{typ}'
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if not files:
-                message = sendMessage(msg, self.bot, self.message)
-                Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
+                if not files:
+                sendMessage(msg, self.bot, self.message)
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
                     fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                        sendMessage(msg + pmwarn, self.bot, self.message)
                         sleep(1)
                         fmsg = ''
                 if fmsg != '':
-                    sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
-              
-                try:
-                    clean_download(f'{DOWNLOAD_DIR}{self.uid}')
-                except FileNotFoundError:
-                    pass
-                with download_dict_lock:
-                    del download_dict[self.uid]
-                    dcount = len(download_dict)
-                if dcount == 0:
-                    self.clean()
-                else:
-                    update_all_messages()
+                    sendMessage(msg + pmwarn, self.bot, self.message)
+
+            try:
+                clean_download(f'{DOWNLOAD_DIR}{self.uid}')
+            except FileNotFoundError:
+                pass
+            with download_dict_lock:
+                del download_dict[self.uid]
+                dcount = len(download_dict)
+            if dcount == 0:
+                self.clean()
+            else:
+                update_all_messages()
        
         else:
             msg += f'\n\n<b>Type: </b>{typ}'
@@ -273,7 +274,7 @@ class MirrorListener:
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
-                        bot.sendMessage(chat_id=chatid, text=msg + msg_g,
+                        bot.sendMessage(chat_id=chatid, text=msg + uploader + msg_g,
                                         reply_markup=InlineKeyboardMarkup(buttons.build_menu(2)),
                                         parse_mode=ParseMode.HTML)
                 except Exception as e:
