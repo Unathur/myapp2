@@ -209,7 +209,7 @@ class MirrorListener:
             if typ != 0:
                 msg += f'\n<b>𝗖𝗼𝗿𝗿𝘂𝗽𝘁𝗲𝗱 𝗙𝗶𝗹𝗲𝘀: </b>{typ}'
             msg += f'\n<b>𝗥𝗲𝗾 𝗕𝘆: </b>{self.tag}\n'
-            if not files:
+            if BOT_PM:
                 sendMessage(msg, self.bot, self.message)
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
             else:
@@ -217,11 +217,11 @@ class MirrorListener:
                 for index, (link, name) in enumerate(files.items(), start=1):
                     fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMessage(msg + pmwarn, self.bot, self.message)
+                        sendMessage(msg, self.bot, self.message)
                         sleep(1)
                         fmsg = ''
                 if fmsg != '':
-                    sendMessage(msg + pmwarn, self.bot, self.message)
+                    sendMessage(msg, self.bot, self.message)
                     Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
 
             try:
