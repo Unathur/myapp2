@@ -210,8 +210,8 @@ class MirrorListener:
                 msg += f'\n<b>Corrupted Files: </b>{typ}'
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if BOT_PM:
-                sendMessage(msg + pmwarn, self.bot, self.message)
-            Thread(target=auto_delete_upload_message, args=(bot, self.message)).start()
+               message = sendMessage(msg + pmwarn, self.bot, self.message)
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
