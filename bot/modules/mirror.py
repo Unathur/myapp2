@@ -222,6 +222,7 @@ class MirrorListener:
                         fmsg = ''
                 if fmsg != '':
                     sendMessage(msg + pmwarn, self.bot, self.message)
+                    Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
 
             try:
                 clean_download(f'{DOWNLOAD_DIR}{self.uid}')
@@ -300,7 +301,7 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-            msg = sendMessage(msg + pmwarn_mirror, self.bot, self.message)
+            msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
             if count == 0:
                 self.clean()
             else:
