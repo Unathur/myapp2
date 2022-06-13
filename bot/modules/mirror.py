@@ -566,5 +566,5 @@ dispatcher.add_handler(unzip_leech_handler)
 dispatcher.add_handler(zip_leech_handler)
 dispatcher.add_handler(qb_leech_handler)
 dispatcher.add_handler(qb_unzip_leech_handler)
-dispatcher.add_handler(qb_zip_leech_handler)"""
+dispatcher.add_handler(qb_zip_leech_handler)
             
