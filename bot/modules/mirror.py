@@ -188,7 +188,6 @@ class MirrorListener:
             self.clean()
         else:
             update_all_messages()
-        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
@@ -199,37 +198,36 @@ class MirrorListener:
         mesg = self.message.text.split('\n')
         message_args = mesg[0].split(' ', maxsplit=1)
         reply_to = self.message.reply_to_message
-
-        msg = f"<b>𝗡𝗮𝗺𝗲: </b><code>{escape(name)}</code>\n\n<b>𝗦𝗶𝘇𝗲: </b>{size}"
+        if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
+            DbManger().rm_complete_task(self.message.link)
+        msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
         pmwarn = f"\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗳𝗶𝗹𝗲𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
         pmwarn_mirror = f"\n\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗹𝗶𝗻𝗸𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
         if self.isLeech:
-            count = len(files)
-            msg += f'\n<b>𝗧𝗼𝘁𝗮𝗹 𝗙𝗶𝗹𝗲𝘀: </b>{count}'
+            
+            msg += f'\n<b>Total Files: </b>{folders}'
             if typ != 0:
-                msg += f'\n<b>𝗖𝗼𝗿𝗿𝘂𝗽𝘁𝗲𝗱 𝗙𝗶𝗹𝗲𝘀: </b>{typ}'
-            msg += f'\n<b>𝗥𝗲𝗾 𝗕𝘆: </b>{self.tag}\n'
+                msg += f'\n<b>Corrupted Files: </b>{typ}'
+            msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if not files:
                 sendMessage(msg, self.bot, self.message)
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
-
-            try:
-                clean_download(f'{DOWNLOAD_DIR}{self.uid}')
-            except FileNotFoundError:
-                pass
-            with download_dict_lock:
-                del download_dict[self.uid]
-                dcount = len(download_dict)
-            if dcount == 0:
-                self.clean()
             else:
-                update_all_messages()
-                    
+                fmsg = ''
+                for index, (link, name) in enumerate(files.items(), start=1):
+                    fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
+                    if len(fmsg.encode() + msg.encode()) > 4000:
+                        sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                        sleep(1)
+                        fmsg = ''
+                if fmsg != '':
+                    sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
         else:
-            msg += f'\n\n<b>𝗧𝘆𝗽𝗲: </b>{typ}'
+            msg += f'\n\n<b>Type: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
-                msg += f'\n<b>𝗦𝘂𝗯𝗙𝗼𝗹𝗱𝗲𝗿𝘀: </b>{folders}'
-                msg += f'\n<b>𝗙𝗶𝗹𝗲𝘀: </b>{files}'
+                msg += f'\n<b>SubFolders: </b>{folders}'
+                msg += f'\n<b>Files: </b>{files}'
+            msg += f'\n\n<b>cc: </b>{self.tag}'
             buttons = ButtonMaker()
             link = short_url(link)
             buttons.buildbutton("☁️ Drive Link", link)
@@ -257,7 +255,8 @@ class MirrorListener:
                 buttons.buildbutton(f"🔗 Source Link", S_link)
             """
             uploader = f'\n\n<b>𝗥𝗲𝗾 𝗕𝘆: </b>{self.tag}'
-            msg_g = f"\n\n<b>𝗗𝗼𝗻𝘁'𝘁 𝗦𝗵𝗮𝗿𝗲 𝗚𝗱𝗿𝗶𝘃𝗲 & 𝗜𝗻𝗱𝗲𝘅 𝗟𝗶𝗻𝗸𝘀 🤒</b>"
+            msg_g = f"\n\n𝗗𝗼𝗻𝘁'𝘁 𝗦𝗵𝗮𝗿𝗲 𝗚𝗱𝗿𝗶𝘃𝗲 & 𝗜𝗻𝗱𝗲𝘅 𝗟𝗶𝗻𝗸𝘀 🤒"
+            
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
@@ -290,12 +289,12 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-            msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
-            if count == 0:
-                self.clean()
-            else:
-                update_all_messages()
-            Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
+        msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
+        if count == 0:
+            self.clean()
+        else:
+            update_all_messages()
+        Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
 
 
     def onUploadError(self, error):
@@ -312,6 +311,7 @@ class MirrorListener:
             self.clean()
         else:
             update_all_messages()
+        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
@@ -566,4 +566,5 @@ dispatcher.add_handler(unzip_leech_handler)
 dispatcher.add_handler(zip_leech_handler)
 dispatcher.add_handler(qb_leech_handler)
 dispatcher.add_handler(qb_unzip_leech_handler)
-dispatcher.add_handler(qb_zip_leech_handler)
+dispatcher.add_handler(qb_zip_leech_handler)"""
+            
