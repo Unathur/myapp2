@@ -211,7 +211,7 @@ class MirrorListener:
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if BOT_PM:
                 sendMessage(msg + pmwarn, self.bot, self.message)
-                Thread(target=auto_delete_upload_message, args=(bot_message)).start()
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
