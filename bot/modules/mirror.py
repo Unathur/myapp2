@@ -222,7 +222,7 @@ class MirrorListener:
                         fmsg = ''
                 if fmsg != '':
                     sendMessage(msg + pmwarn, self.bot, self.message)
-                    Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
+                    Thread(target=auto_delete_upload_message, args=(bot, self.message)).start()
 
             try:
                 clean_download(f'{DOWNLOAD_DIR}{self.uid}')
