@@ -32,7 +32,7 @@ from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
 from bot.helper.mirror_utils.upload_utils.pyrogramEngine import TgUploader
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, delete_all_messages, update_all_messages, auto_delete_message, auto_delete_upload_message
+from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, delete_all_messages, update_all_messages, auto_delete_message
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.db_handler import DbManger
 
@@ -188,6 +188,7 @@ class MirrorListener:
             self.clean()
         else:
             update_all_messages()
+        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
@@ -198,20 +199,19 @@ class MirrorListener:
         mesg = self.message.text.split('\n')
         message_args = mesg[0].split(' ', maxsplit=1)
         reply_to = self.message.reply_to_message
-        if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
-            DbManger().rm_complete_task(self.message.link)
-        msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
+
+        msg = f"<b>𝗡𝗮𝗺𝗲: </b><code>{escape(name)}</code>\n\n<b>𝗦𝗶𝘇𝗲: </b>{size}"
         pmwarn = f"\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗳𝗶𝗹𝗲𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
         pmwarn_mirror = f"\n\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗹𝗶𝗻𝗸𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
         if self.isLeech:
-            
-            msg += f'\n<b>Total Files: </b>{folders}'
+            count = len(files)
+            msg += f'\n<b>𝗧𝗼𝘁𝗮𝗹 𝗙𝗶𝗹𝗲𝘀: </b>{count}'
             if typ != 0:
-                msg += f'\n<b>Corrupted Files: </b>{typ}'
-            msg += f'\n<b>cc: </b>{self.tag}\n\n'
+                msg += f'\n<b>𝗖𝗼𝗿𝗿𝘂𝗽𝘁𝗲𝗱 𝗙𝗶𝗹𝗲𝘀: </b>{typ}'
+            msg += f'\n<b>𝗥𝗲𝗾 𝗕𝘆: </b>{self.tag}\n'
             if not files:
-                msg2 = sendMessage(msg, bot, self.message)
-                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg2)).start()
+                sendMessage(msg, self.bot, self.message)
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
@@ -222,7 +222,6 @@ class MirrorListener:
                         fmsg = ''
                 if fmsg != '':
                     sendMessage(msg + pmwarn, self.bot, self.message)
-                    Thread(target=auto_delete_upload_message, args=(bot, self.message)).start()
 
             try:
                 clean_download(f'{DOWNLOAD_DIR}{self.uid}')
@@ -235,13 +234,12 @@ class MirrorListener:
                 self.clean()
             else:
                 update_all_messages()
-       
+                    
         else:
-            msg += f'\n\n<b>Type: </b>{typ}'
+            msg += f'\n\n<b>𝗧𝘆𝗽𝗲: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
-                msg += f'\n<b>SubFolders: </b>{folders}'
-                msg += f'\n<b>Files: </b>{files}'
-            msg += f'\n\n<b>cc: </b>{self.tag}'
+                msg += f'\n<b>𝗦𝘂𝗯𝗙𝗼𝗹𝗱𝗲𝗿𝘀: </b>{folders}'
+                msg += f'\n<b>𝗙𝗶𝗹𝗲𝘀: </b>{files}'
             buttons = ButtonMaker()
             link = short_url(link)
             buttons.buildbutton("☁️ Drive Link", link)
@@ -269,8 +267,7 @@ class MirrorListener:
                 buttons.buildbutton(f"🔗 Source Link", S_link)
             """
             uploader = f'\n\n<b>𝗥𝗲𝗾 𝗕𝘆: </b>{self.tag}'
-            msg_g = f"\n\n𝗗𝗼𝗻𝘁'𝘁 𝗦𝗵𝗮𝗿𝗲 𝗚𝗱𝗿𝗶𝘃𝗲 & 𝗜𝗻𝗱𝗲𝘅 𝗟𝗶𝗻𝗸𝘀 🤒"
-            
+            msg_g = f"\n\n<b>𝗗𝗼𝗻𝘁'𝘁 𝗦𝗵𝗮𝗿𝗲 𝗚𝗱𝗿𝗶𝘃𝗲 & 𝗜𝗻𝗱𝗲𝘅 𝗟𝗶𝗻𝗸𝘀 🤒</b>"
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
@@ -303,12 +300,12 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMessage(msg + pmwarn_mirror, self.bot, self.message)
-        if count == 0:
-            self.clean()
-        else:
-            update_all_messages()
-        Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
+            msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
+            if count == 0:
+                self.clean()
+            else:
+                update_all_messages()
+            Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
 
 
     def onUploadError(self, error):
@@ -325,7 +322,6 @@ class MirrorListener:
             self.clean()
         else:
             update_all_messages()
-        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
@@ -581,4 +577,3 @@ dispatcher.add_handler(zip_leech_handler)
 dispatcher.add_handler(qb_leech_handler)
 dispatcher.add_handler(qb_unzip_leech_handler)
 dispatcher.add_handler(qb_zip_leech_handler)
-            
