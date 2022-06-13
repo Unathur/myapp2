@@ -209,7 +209,7 @@ class MirrorListener:
             if typ != 0:
                 msg += f'\n<b>Corrupted Files: </b>{typ}'
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
-            if not files:
+            if BOT_PM:
                 sendMessage(msg + pmwarn, self.bot, self.message)
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
             else:
