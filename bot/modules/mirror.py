@@ -231,10 +231,12 @@ class MirrorListener:
             with download_dict_lock:
                 del download_dict[self.uid]
                 dcount = len(download_dict)
-            if dcount == 0:
-                self.clean()
+                msg = sendMessage(msg + uploader + pmwarn, self.bot, self.message)
+                if count == 0:
+                    self.clean()
             else:
                 update_all_messages()
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
                     
         else:
             msg += f'\n\n<b>𝗧𝘆𝗽𝗲: </b>{typ}'
