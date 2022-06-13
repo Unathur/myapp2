@@ -234,8 +234,8 @@ class MirrorListener:
                 msg = sendMessage(msg + uploader + pmwarn, self.bot, self.message)
                 if count == 0:
                     self.clean()
-            else:
-                update_all_messages()
+                else:
+                    update_all_messages()
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
                     
         else:
