@@ -212,16 +212,6 @@ class MirrorListener:
             if not files:
                 sendMessage(msg, self.bot, self.message)
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, message)).start()
-            else:
-                fmsg = ''
-                for index, (link, name) in enumerate(files.items(), start=1):
-                    fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
-                    if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMessage(msg + pmwarn, self.bot, self.message)
-                        sleep(1)
-                        fmsg = ''
-                if fmsg != '':
-                    sendMessage(msg + pmwarn, self.bot, self.message)
 
             try:
                 clean_download(f'{DOWNLOAD_DIR}{self.uid}')
