@@ -223,7 +223,7 @@ class MirrorListener:
                 if fmsg != '':
                     sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
               
-               try:
+                try:
                 clean_download(f'{DOWNLOAD_DIR}{self.uid}')
             except FileNotFoundError:
                 pass
