@@ -273,7 +273,7 @@ class MirrorListener:
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
-                        bot.sendMessage(chat_id=chatid, text=msg + uploader + msg_g,
+                        bot.sendMessage(chat_id=chatid, text=msg + msg_g,
                                         reply_markup=InlineKeyboardMarkup(buttons.build_menu(2)),
                                         parse_mode=ParseMode.HTML)
                 except Exception as e:
@@ -302,7 +302,7 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
+        msg = sendMessage(msg + pmwarn_mirror, self.bot, self.message)
         if count == 0:
             self.clean()
         else:
