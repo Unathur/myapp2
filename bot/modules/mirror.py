@@ -199,7 +199,6 @@ class MirrorListener:
         mesg = self.message.text.split('\n')
         message_args = mesg[0].split(' ', maxsplit=1)
         reply_to = self.message.reply_to_message
-
         msg = f"<b>𝗡𝗮𝗺𝗲: </b><code>{escape(name)}</code>\n\n<b>𝗦𝗶𝘇𝗲: </b>{size}"
         pmwarn = f"\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗳𝗶𝗹𝗲𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
         pmwarn_mirror = f"\n\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗹𝗶𝗻𝗸𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
@@ -236,8 +235,7 @@ class MirrorListener:
                     self.clean()
                 else:
                     update_all_messages()
-                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
-                    
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()         
         else:
             msg += f'\n\n<b>𝗧𝘆𝗽𝗲: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
