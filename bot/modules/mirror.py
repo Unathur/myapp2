@@ -287,12 +287,12 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMessage(msg + pmwarn_mirror, self.bot, self.message)
+        msg = sendMarkup(msg + pmwarn_mirror, self.bot, self.message)
         if count == 0:
             self.clean()
         else:
             update_all_messages()
-        Thread(target=auto_delete_message, args=(bot, self.message)).start()
+        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
     def onUploadError(self, error):
         e_str = error.replace('<', '').replace('>', '')
