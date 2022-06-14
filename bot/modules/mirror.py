@@ -290,6 +290,7 @@ class MirrorListener:
             self.clean()
         else:
             update_all_messages()
+        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
     def onUploadError(self, error):
         e_str = error.replace('<', '').replace('>', '')
