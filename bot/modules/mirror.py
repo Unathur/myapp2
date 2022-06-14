@@ -255,6 +255,7 @@ class MirrorListener:
             if SOURCE_LINK is True:
                 buttons.buildbutton(f"🔗 Source Link", S_link)
             """
+            uploader = f'\n\n<b>#Uploaded By: </b>{self.tag}\n'
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
@@ -277,6 +278,8 @@ class MirrorListener:
                         osremove(f'{DOWNLOAD_DIR}{self.uid}/{name}')
                     except:
                         pass
+                msg = sendMarkup(msg + uploader + pmwarn_mirror, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
                 return
         clean_download(f'{DOWNLOAD_DIR}{self.uid}')
         with download_dict_lock:
