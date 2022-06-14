@@ -32,7 +32,7 @@ from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
 from bot.helper.mirror_utils.upload_utils.pyrogramEngine import TgUploader
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, delete_all_messages, update_all_messages, auto_delete_message, auto_delete_upload_message, sendStatusMessage
+from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, delete_all_messages, update_all_messages, auto_delete_message
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.db_handler import DbManger
 
@@ -201,14 +201,40 @@ class MirrorListener:
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
         msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
-        pmwarn = f"\n<b>I have send files in PM.</b>\n"
-        pmwarn_mirror = f"\n<b>I have send links in PM.</b>\n"
         if self.isLeech:
-            count = len(files)
-            msg += f'\n<b>Total Files: </b>{count}'
+            try:
+                source_link = message_args[1]
+                if is_magnet(source_link):
+                    link = telegraph.create_page(
+                        title='Helios-Mirror Source Link',
+                        content=source_link,
+                    )["path"]
+                    buttons.buildbutton(f"🔗 Source Link", f"https://telegra.ph/{link}")
+                else:
+                    buttons.buildbutton(f"🔗 Source Link", source_link)
+            except Exception as e:
+                LOGGER.warning(e)
+                pass
+                if reply_to is not None:
+                    try:
+                        reply_text = reply_to.text
+                        if is_url(reply_text):
+                            source_link = reply_text.strip()
+                            if is_magnet(source_link):
+                                link = telegraph.create_page(
+                                    title='Helios-Mirror Source Link',
+                                    content=source_link,
+                                )["path"]
+                                buttons.buildbutton(f"🔗 Source Link", f"https://telegra.ph/{link}")
+                            else:
+                                buttons.buildbutton(f"🔗 Source Link", source_link)
+                    except Exception as e:
+                        LOGGER.warning(e)
+                        pass
+            msg += f'\n<b>Total Files: </b>{folders}'
             if typ != 0:
                 msg += f'\n<b>Corrupted Files: </b>{typ}'
-            msg += f'\n<b>Req By: </b>{self.tag}\n'
+            msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if not files:
                 sendMessage(msg, self.bot, self.message)
             else:
@@ -216,16 +242,17 @@ class MirrorListener:
                 for index, (link, name) in enumerate(files.items(), start=1):
                     fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMarkup(msg + pmwarn, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                        sendMarkup(msg + fmsg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
                         sleep(1)
                         fmsg = ''
                 if fmsg != '':
-                    sendMarkup(msg + pmwarn, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                    sendMarkup(msg + fmsg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
         else:
             msg += f'\n\n<b>Type: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
                 msg += f'\n<b>SubFolders: </b>{folders}'
                 msg += f'\n<b>Files: </b>{files}'
+            msg += f'\n\n<b>cc: </b>{self.tag}'
             buttons = ButtonMaker()
             link = short_url(link)
             buttons.buildbutton("☁️ Drive Link", link)
@@ -250,15 +277,41 @@ class MirrorListener:
                 buttons.buildbutton(f"{BUTTON_FIVE_NAME}", f"{BUTTON_FIVE_URL}")
             if BUTTON_SIX_NAME is not None and BUTTON_SIX_URL is not None:
                 buttons.buildbutton(f"{BUTTON_SIX_NAME}", f"{BUTTON_SIX_URL}")
-            """
             if SOURCE_LINK is True:
-                buttons.buildbutton(f"🔗 Source Link", S_link)
-            """
-            uploader = f'\n\n<b>Req By: </b>{self.tag}\n'
+                try:
+                    source_link = message_args[1]
+                    if is_magnet(source_link):
+                        link = telegraph.create_page(
+                            title='Helios-Mirror Source Link',
+                            content=source_link,
+                        )["path"]
+                        buttons.buildbutton(f"🔗 Source Link", f"https://telegra.ph/{link}")
+                    else:
+                        buttons.buildbutton(f"🔗 Source Link", source_link)
+                except Exception as e:
+                    LOGGER.warning(e)
+                    pass
+            if reply_to is not None:
+                try:
+                    reply_text = reply_to.text
+                    if is_url(reply_text):
+                        source_link = reply_text.strip()
+                        if is_magnet(source_link):
+                            link = telegraph.create_page(
+                                title='Helios-Mirror Source Link',
+                                content=source_link,
+                            )["path"]
+                            buttons.buildbutton(f"🔗 Source Link", f"https://telegra.ph/{link}")
+                        else:
+                            buttons.buildbutton(f"🔗 Source Link", source_link)
+                except Exception as e:
+                    LOGGER.warning(e)
+                    pass
+            sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
-                        bot.sendMessage(chat_id=chatid, text=msg + uploader,
+                        bot.sendMessage(chat_id=chatid, text=msg,
                                         reply_markup=InlineKeyboardMarkup(buttons.build_menu(2)),
                                         parse_mode=ParseMode.HTML)
                 except Exception as e:
@@ -277,8 +330,6 @@ class MirrorListener:
                         osremove(f'{DOWNLOAD_DIR}{self.uid}/{name}')
                     except:
                         pass
-                msg = sendMarkup(msg + uploader + pmwarn_mirror, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
-                Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
                 return
         clean_download(f'{DOWNLOAD_DIR}{self.uid}')
         with download_dict_lock:
@@ -287,12 +338,10 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
         if count == 0:
             self.clean()
         else:
             update_all_messages()
-        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
 
     def onUploadError(self, error):
         e_str = error.replace('<', '').replace('>', '')
