@@ -202,7 +202,7 @@ class MirrorListener:
             DbManger().rm_complete_task(self.message.link)
         msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
         pmwarn = f"\n<b>I have send files in PM.</b>\n"
-        pmwarn_mirror = f"\n\n<b>I have send links in PM.</b>\n"
+        pmwarn_mirror = f"\n<b>I have send links in PM.</b>\n"
         if self.isLeech:
             count = len(files)
             msg += f'\n<b>Total Files: </b>{count}'
