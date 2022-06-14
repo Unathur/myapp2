@@ -285,7 +285,7 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.update)
+        msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
         if count == 0:
             self.clean()
         else:
