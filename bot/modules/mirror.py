@@ -258,7 +258,7 @@ class MirrorListener:
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
-                        bot.sendMessage(chat_id=chatid, text=msg,
+                        bot.sendMessage(chat_id=chatid, text=msg + uploader,
                                         reply_markup=InlineKeyboardMarkup(buttons.build_menu(2)),
                                         parse_mode=ParseMode.HTML)
                 except Exception as e:
