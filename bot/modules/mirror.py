@@ -216,11 +216,11 @@ class MirrorListener:
                 for index, (link, name) in enumerate(files.items(), start=1):
                     fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMarkup(msg + fmsg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                        sendMarkup(msg + pmwarn, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
                         sleep(1)
                         fmsg = ''
                 if fmsg != '':
-                    sendMarkup(msg + fmsg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                    sendMarkup(msg + pmwarn, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
         else:
             msg += f'\n\n<b>Type: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
@@ -292,7 +292,7 @@ class MirrorListener:
             self.clean()
         else:
             update_all_messages()
-        Thread(target=auto_delete_message, args=(bot, self.message, msg)).start()
+        Thread(target=auto_delete_message, args=(bot, self.message)).start()
 
     def onUploadError(self, error):
         e_str = error.replace('<', '').replace('>', '')
