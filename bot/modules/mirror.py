@@ -277,7 +277,7 @@ class MirrorListener:
                         osremove(f'{DOWNLOAD_DIR}{self.uid}/{name}')
                     except:
                         pass
-                msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                msg = sendMarkup(msg + uploader + pmwarn_mirror, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
                 return
         clean_download(f'{DOWNLOAD_DIR}{self.uid}')
@@ -287,7 +287,7 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMessage(msg + pmwarn_mirror, self.bot, self.message)
+        msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message)
         if count == 0:
             self.clean()
         else:
