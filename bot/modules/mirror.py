@@ -200,9 +200,9 @@ class MirrorListener:
         reply_to = self.message.reply_to_message
         if not self.isPrivate and INCOMPLETE_TASK_NOTIFIER and DB_URI is not None:
             DbManger().rm_complete_task(self.message.link)
-        msg = f"<b>𝗡𝗮𝗺𝗲: </b><code>{escape(name)}</code>\n\n<b>𝗦𝗶𝘇𝗲: </b>{size}"
-        pmwarn = f"\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗳𝗶𝗹𝗲𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
-        pmwarn_mirror = f"\n\n<b>𝗜 𝗵𝗮𝘃𝗲 𝘀𝗲𝗻𝗱 𝗹𝗶𝗻𝗸𝘀 𝗶𝗻 𝗣𝗠.</b>\n"
+        msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
+        pmwarn = f"\n<b>I have send files in PM.</b>\n"
+        pmwarn_mirror = f"\n\n<b>I have send links in PM.</b>\n"
         if self.isLeech:
             count = len(files)
             msg += f'\n<b>Total Files: </b>{count}'
@@ -226,7 +226,6 @@ class MirrorListener:
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
                 msg += f'\n<b>SubFolders: </b>{folders}'
                 msg += f'\n<b>Files: </b>{files}'
-            msg += f'\n\n<b>cc: </b>{self.tag}'
             buttons = ButtonMaker()
             link = short_url(link)
             buttons.buildbutton("☁️ Drive Link", link)
@@ -255,7 +254,7 @@ class MirrorListener:
             if SOURCE_LINK is True:
                 buttons.buildbutton(f"🔗 Source Link", S_link)
             """
-            uploader = f'\n\n<b>#Uploaded By: </b>{self.tag}\n'
+            uploader = f'\n\n<b>Req By: </b>{self.tag}\n'
             if MIRROR_LOGS:
                 try:
                     for chatid in MIRROR_LOGS:
