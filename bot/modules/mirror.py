@@ -216,7 +216,7 @@ class MirrorListener:
                 for index, (link, name) in enumerate(files.items(), start=1):
                     fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
-                        sendMarkup(msg, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                        sendMarkup(msg + pmwarn, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
                         sleep(1)
                         fmsg = ''
                 if fmsg != '':
@@ -277,7 +277,7 @@ class MirrorListener:
                         osremove(f'{DOWNLOAD_DIR}{self.uid}/{name}')
                     except:
                         pass
-                msg = sendMarkup(msg + uploader + pmwarn_mirror, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
+                msg = sendMessage(msg + uploader + pmwarn_mirror, self.bot, self.message, InlineKeyboardMarkup(buttons.build_menu(2)))
                 Thread(target=auto_delete_upload_message, args=(bot, self.message, msg)).start()
                 return
         clean_download(f'{DOWNLOAD_DIR}{self.uid}')
@@ -287,7 +287,7 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = sendMarkup(msg + pmwarn_mirror, self.bot, self.message)
+        msg = sendMessage(msg + pmwarn_mirror, self.bot, self.message)
         if count == 0:
             self.clean()
         else:
